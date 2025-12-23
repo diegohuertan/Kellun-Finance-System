@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Key } from 'lucide-react';
+import { CheckCircle, Key, Loader2 } from 'lucide-react';
 
 export default function ResetPasswordPage() {
     const [newPassword, setNewPassword] = useState('');
@@ -13,7 +13,6 @@ export default function ResetPasswordPage() {
     const [success, setSuccess] = useState(false);
     const router = useRouter();
 
-    // Check if we have a valid recovery session
     useEffect(() => {
         const checkSession = async () => {
             try {
@@ -21,10 +20,10 @@ export default function ResetPasswordPage() {
                 const { data: { user }, error } = await supabase.getSupabaseClient().auth.getUser();
 
                 if (error || !user) {
-                    setError('Invalid or expired reset link. Please request a new password reset.');
+                    setError('El enlace es inválido o ha expirado. Solicita uno nuevo.');
                 }
             } catch {
-                setError('Failed to verify reset session');
+                setError('No pudimos verificar tu sesión.');
             }
         };
 
@@ -36,12 +35,12 @@ export default function ResetPasswordPage() {
         setError('');
 
         if (newPassword !== confirmPassword) {
-            setError("Passwords don't match");
+            setError("Las contraseñas no coinciden ❌");
             return;
         }
 
         if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters long');
+            setError('La contraseña debe tener al menos 6 caracteres');
             return;
         }
 
@@ -56,6 +55,7 @@ export default function ResetPasswordPage() {
             if (error) throw error;
 
             setSuccess(true);
+            // Redirigir después de 3 segundos
             setTimeout(() => {
                 router.push('/app');
             }, 3000);
@@ -63,7 +63,7 @@ export default function ResetPasswordPage() {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Failed to reset password');
+                setError('Error al actualizar contraseña');
             }
         } finally {
             setLoading(false);
@@ -72,19 +72,20 @@ export default function ResetPasswordPage() {
 
     if (success) {
         return (
-            <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="bg-white py-8 px-4 shadow-xl border border-slate-100 sm:rounded-2xl sm:px-10 max-w-md mx-auto mt-10">
                 <div className="text-center">
-                    <div className="flex justify-center mb-4">
-                        <CheckCircle className="h-16 w-16 text-green-500" />
+                    <div className="flex justify-center mb-4 bg-emerald-50 w-20 h-20 rounded-full items-center mx-auto animate-bounce">
+                        <CheckCircle className="h-10 w-10 text-emerald-500" />
                     </div>
 
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        Password reset successful
+                    <h2 className="text-2xl font-black text-slate-900 mb-2">
+                        ¡Contraseña Actualizada!
                     </h2>
 
-                    <p className="text-gray-600 mb-8">
-                        Your password has been successfully reset.
-                        You will be redirected to the app in a moment.
+                    <p className="text-slate-500 mb-8">
+                        Has recuperado el acceso exitosamente.
+                        <br/>
+                        <span className="text-sm font-bold text-emerald-600">Te redirigiremos al portal en un momento...</span>
                     </p>
                 </div>
             </div>
@@ -92,26 +93,26 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white py-8 px-4 shadow-xl border border-slate-100 sm:rounded-2xl sm:px-10 max-w-md mx-auto mt-10">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="flex justify-center mb-4">
-                    <Key className="h-12 w-12 text-primary-600" />
+                <div className="flex justify-center mb-4 bg-purple-50 w-16 h-16 rounded-full items-center mx-auto">
+                    <Key className="h-8 w-8 text-purple-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
-                    Create new password
+                <h2 className="text-2xl font-black text-center text-slate-900 mb-8">
+                    Crea tu nueva clave
                 </h2>
             </div>
 
             {error && (
-                <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+                <div className="mb-6 p-4 text-sm text-red-700 bg-red-50 rounded-xl border border-red-100 text-center font-bold">
                     {error}
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                    <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
-                        New Password
+                    <label htmlFor="new-password" className="block text-sm font-bold text-slate-700 mb-1">
+                        Nueva Contraseña
                     </label>
                     <div className="mt-1">
                         <input
@@ -122,14 +123,14 @@ export default function ResetPasswordPage() {
                             required
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                            className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
-                        Confirm New Password
+                    <label htmlFor="confirm-password" className="block text-sm font-bold text-slate-700 mb-1">
+                        Confirmar Contraseña
                     </label>
                     <div className="mt-1">
                         <input
@@ -140,11 +141,11 @@ export default function ResetPasswordPage() {
                             required
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                            className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
                         />
                     </div>
-                    <p className="mt-2 text-sm text-gray-500">
-                        Password must be at least 6 characters long
+                    <p className="mt-2 text-xs text-slate-400 font-medium">
+                        Mínimo 6 caracteres
                     </p>
                 </div>
 
@@ -152,9 +153,9 @@ export default function ResetPasswordPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex w-full justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
+                        className="flex w-full justify-center rounded-xl border border-transparent bg-purple-600 py-3.5 px-4 text-sm font-bold text-white shadow-lg shadow-purple-200 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 transition-all hover:-translate-y-0.5"
                     >
-                        {loading ? 'Resetting password...' : 'Reset password'}
+                        {loading ? <Loader2 className="animate-spin w-5 h-5"/> : 'Actualizar y Entrar'}
                     </button>
                 </div>
             </form>
