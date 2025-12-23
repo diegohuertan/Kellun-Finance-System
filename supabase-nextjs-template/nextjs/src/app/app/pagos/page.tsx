@@ -20,15 +20,23 @@ export default function ResumenDashboard() {
         async function loadStats() {
             if (!user?.id) return;
 
-            // Consultamos todas las cuotas del socio para calcular totales
+            // 1. CORRECCIÓN AQUÍ: Pedimos 'monto', NO 'monto_total'
             const { data } = await supabase
                 .from("cuotas")
-                .select("monto_total, estado")
+                .select("monto, estado") 
                 .eq("socio_id", user.id);
 
             if (data) {
-                const pagado = data.filter(c => c.estado === 'pagado').reduce((acc, c) => acc + Number(c.monto_total), 0);
-                const pendiente = data.filter(c => c.estado === 'pendiente').reduce((acc, c) => acc + Number(c.monto_total), 0);
+                // 2. CORRECCIÓN AQUÍ: Usamos c.monto
+                const pagado = data
+                    .filter(c => c.estado === 'pagado')
+                    .reduce((acc, c) => acc + Number(c.monto), 0);
+                
+                // 3. CORRECCIÓN AQUÍ: Usamos c.monto
+                const pendiente = data
+                    .filter(c => c.estado === 'pendiente')
+                    .reduce((acc, c) => acc + Number(c.monto), 0);
+                
                 setStats({ pagado, pendiente, total: pagado + pendiente });
             }
             setFetching(false);
@@ -82,28 +90,35 @@ export default function ResumenDashboard() {
             <Card className="border-none shadow-lg p-6 bg-white">
                 <CardTitle className="text-xl font-bold text-slate-800 mb-8 italic">Balance de Cuotas</CardTitle>
                 <div className="h-[350px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={dataChart}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={80}
-                                outerRadius={120}
-                                paddingAngle={8}
-                                dataKey="value"
-                            >
-                                {dataChart.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                                ))}
-                            </Pie>
-                            <Tooltip 
-                                contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                formatter={(value: number) => `$${value.toLocaleString('es-CL')}`}
-                            />
-                            <Legend verticalAlign="bottom" height={36}/>
-                        </PieChart>
-                    </ResponsiveContainer>
+                    {/* Agregamos protección para no renderizar gráfico vacío */}
+                    {stats.total > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={dataChart}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={80}
+                                    outerRadius={120}
+                                    paddingAngle={8}
+                                    dataKey="value"
+                                >
+                                    {dataChart.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                                    ))}
+                                </Pie>
+                                <Tooltip 
+                                    contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    formatter={(value: number) => `$${value.toLocaleString('es-CL')}`}
+                                />
+                                <Legend verticalAlign="bottom" height={36}/>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-slate-400 italic">
+                            No hay datos financieros registrados.
+                        </div>
+                    )}
                 </div>
             </Card>
         </div>

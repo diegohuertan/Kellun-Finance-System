@@ -80,7 +80,7 @@ export default function DashboardHockey() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold mb-6">${cuota.monto_total.toLocaleString('es-CL')}</div>
+                            <div className="text-3xl font-bold mb-6">${cuota.monto.toLocaleString('es-CL')}</div>
                             
                             {cuota.estado === 'pendiente' ? (
                                 <Button 
