@@ -1,11 +1,9 @@
-// src/app/auth/login/page.tsx
 'use client';
 
 import { createSPASassClient } from '@/lib/supabase/client';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import SSOButtons from '@/components/SSOButtons';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -26,7 +24,6 @@ export default function LoginPage() {
 
             if (signInError) throw signInError;
 
-            // Check if MFA is required
             const supabase = client.getSupabaseClient();
             const { data: mfaData, error: mfaError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
@@ -40,15 +37,14 @@ export default function LoginPage() {
             }
         } catch (err) {
             if (err instanceof Error) {
-                setError(err.message);
+                setError('Credenciales inválidas. Inténtalo de nuevo.');
             } else {
-                setError('An unknown error occurred');
+                setError('Ocurrió un error inesperado.');
             }
         } finally {
             setLoading(false);
         }
     };
-
 
     useEffect(() => {
         if(showMFAPrompt) {
@@ -56,79 +52,81 @@ export default function LoginPage() {
         }
     }, [showMFAPrompt, router]);
 
-
     return (
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white py-10 px-8 shadow-xl rounded-3xl border border-slate-100">
+            {/* Header de Identidad */}
+            <div className="text-center mb-8">
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2 italic">
+                    Kellun Finance 🏒
+                </h1>
+                <p className="text-slate-500 font-medium italic">Portal de Socios</p>
+            </div>
+
             {error && (
-                <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-                    {error}
+                <div className="mb-6 p-4 text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl flex items-center italic">
+                    <span className="mr-2">⚠️</span> {error}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email address
+                    <label htmlFor="email" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Correo Electrónico
                     </label>
-                    <div className="mt-1">
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
-                        />
-                    </div>
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="ejemplo@correo.com"
+                        className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-all"
+                    />
                 </div>
 
                 <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        Password
+                    <label htmlFor="password" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Contraseña
                     </label>
-                    <div className="mt-1">
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autoComplete="current-password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
-                        />
-                    </div>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm transition-all"
+                    />
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="text-sm">
-                        <Link href="/auth/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
-                            Forgot your password?
-                        </Link>
-                    </div>
+                <div className="flex justify-end">
+                    <Link href="/auth/forgot-password" ml-2 className="text-xs font-bold text-primary-600 hover:text-primary-700 uppercase tracking-tighter">
+                        ¿Olvidaste tu contraseña?
+                    </Link>
                 </div>
 
-                <div>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="flex w-full justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
-                    >
-                        {loading ? 'Signing in...' : 'Sign in'}
-                    </button>
-                </div>
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex w-full justify-center rounded-xl bg-primary-600 py-4 px-4 text-sm font-black text-white shadow-lg shadow-primary-100 hover:bg-primary-700 focus:outline-none transition-all disabled:opacity-50 uppercase tracking-widest"
+                >
+                    {loading ? (
+                        <span className="flex items-center italic">
+                            Cargando...
+                        </span>
+                    ) : 'Ingresar'}
+                </button>
             </form>
 
-            <SSOButtons onError={setError} />
-
-            <div className="mt-6 text-center text-sm">
-                <span className="text-gray-600">Don&#39;t have an account?</span>
-                {' '}
-                <Link href="/auth/register" className="font-medium text-primary-600 hover:text-primary-500">
-                    Sign up
-                </Link>
+            <div className="mt-8 pt-6 border-t border-slate-50 text-center">
+                <p className="text-sm text-slate-500 italic">
+                    ¿Aún no eres socio?{' '}
+                    <Link href="/auth/register" className="font-bold text-primary-600 hover:underline tracking-tight">
+                        Regístrate aquí
+                    </Link>
+                </p>
             </div>
         </div>
     );
